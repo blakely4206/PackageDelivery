@@ -28,13 +28,7 @@ def sort_for_early_delivery(package_list):
                     package_list[j] = package_list[j+1]
                     package_list[j+1] = later_pkg
 
-    for i in range(len(package_list)-1):
-        for j in range(1,len(package_list)):
-            if(package_list[i].location_id == package_list[j].location_id and i != j):
-                same_dest= package_list[j]
-                package_list.remove(same_dest)
-                package_list.insert(i, same_dest)
-
+    sort_for_duplicate_locations(package_list)
     return index_of_last_EOD
 
 def sort_for_duplicate_locations(package_list):
@@ -45,16 +39,6 @@ def sort_for_duplicate_locations(package_list):
                 package_list.remove(same_dest)
                 package_list.insert(i, same_dest)
     return 0
-
-#def get_last_early_delivery(package_list):
-#    #Iterate through the package list to return the index 
-#    #of the last package without an EOD deadline.
-#    start = 0
-
-#    for i in range(len(package_list)):
-#        if(package_list[i].deadline != "EOD"):
-#            start = i
-#    return start
 
 def sort_packages(the_truck: Truck):  
 
@@ -83,9 +67,6 @@ def sort_packages(the_truck: Truck):
                    
         the_truck.package_list[i], the_truck.package_list[min] = the_truck.package_list[min], the_truck.package_list[i] 
     
-    #Find any packages going to previous locations and more them towards 
-    #the beginning of package_list.
-    sort_for_duplicate_locations(the_truck.package_list)
     return 0
 
 def load_trucks():

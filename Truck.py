@@ -22,8 +22,8 @@ class Truck:
     def ViewCargo(self):
         pkg: Package   
         s = ""
-        for pkg in self.package_list:         
-            s += "|ID: %s |Loc ID: %s |Address: %s |City: %s |State: %s |Zip: %s |Weight: %s |Status: %s |Deadline: %s |\n" % (pkg.ID, pkg.location_id, pkg.address, pkg.city, pkg.state, pkg.zip, pkg.weight, pkg.status, pkg.getDeadline())   
+        for pkg in self.package_list: 
+            s += "|ID: %-2s |Loc ID: %-2s |Address: %-41s |City: %-18s |State: %-6s |Zip: %-5s |Weight: %-2s |Status: %-20s |Deadline: %-18s |\n" % (pkg.ID, pkg.location_id, pkg.address, pkg.city, pkg.state, pkg.zip, pkg.weight, pkg.status, pkg.getDeadline())   
             
         return s
 
