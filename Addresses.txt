@@ -1,11 +1,11 @@
 4001 S 700 E|Salt Lake City|UT|84107
-1060 Dalton|Ave S|Salt Lake City|UT|84104
+1060 Dalton Ave S|Salt Lake City|UT|84104
 1330 2100 S|Salt Lake City|UT|84106
-1488 4800 S|Salt|Lake City|UT|84123
+1488 4800 S|Salt Lake City|UT|84123
 177 W Price Ave|Salt Lake City|UT|84115
 195 W Oakland Ave|Salt Lake City|UT|84115
 2010 W 500 S|Salt Lake City|UT|84104
-2300 Parkway Blvd|West Valley City|UT|84119
+2300 Parkway Blvd|W Valley City|UT|84119
 233 Canyon Rd|Salt Lake City|UT|84103
 2530 S 500 E|Salt Lake City|UT|84106
 2600 Taylorsville Blvd|Salt Lake City|UT|84118

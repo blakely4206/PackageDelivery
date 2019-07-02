@@ -9,7 +9,6 @@ from Truck import Truck
 import operator
 from Vertex import Vertex
 
-weight_matrix =  [[0 for column in range(27)] for row in range(27)] 
 location_list = []
 vertex_list = []
 the_graph = Graph()
@@ -19,13 +18,24 @@ trucks = [Truck(1), Truck(2)]
 HUB = 0
 
 def sort_for_early_delivery(package_list):
+    index_of_last_EOD = 0
     for i in range(len(package_list)):
+        if(package_list[i].deadline != "EOD"):
+            index_of_last_EOD = i
         for j in range(len(package_list)-i - 1):
                 if(package_list[j].getDeadline() > package_list[j+1].getDeadline()):
                     later_pkg = package_list[j]
                     package_list[j] = package_list[j+1]
                     package_list[j+1] = later_pkg
-    return 0
+
+    for i in range(len(package_list)-1):
+        for j in range(1,len(package_list)):
+            if(package_list[i].location_id == package_list[j].location_id and i != j):
+                same_dest= package_list[j]
+                package_list.remove(same_dest)
+                package_list.insert(i, same_dest)
+
+    return index_of_last_EOD
 
 def sort_for_duplicate_locations(package_list):
     for i in range(len(package_list)-1):
@@ -36,15 +46,15 @@ def sort_for_duplicate_locations(package_list):
                 package_list.insert(i, same_dest)
     return 0
 
-def get_last_early_delivery(package_list):
-    #Iterate through the package list to return the index 
-    #of the last package without an EOD deadline.
-    start = 0
+#def get_last_early_delivery(package_list):
+#    #Iterate through the package list to return the index 
+#    #of the last package without an EOD deadline.
+#    start = 0
 
-    for i in range(len(package_list)):
-        if(package_list[i].deadline != "EOD"):
-            start = i
-    return start
+#    for i in range(len(package_list)):
+#        if(package_list[i].deadline != "EOD"):
+#            start = i
+#    return start
 
 def sort_packages(the_truck: Truck):  
 
@@ -56,14 +66,18 @@ def sort_packages(the_truck: Truck):
     #Packages are already sorted by deadline. Start with final non-EOD
     #package and then find nearest neighbor.
 
-    start = get_last_early_delivery(the_truck.package_list)
+    #start = get_last_early_delivery(the_truck.package_list)
+    start = sort_for_early_delivery(the_truck.package_list)
     n = len(the_truck.package_list)
 
     for i in range(start, n): 
         min = i 
         for j in range(i+1, n): 
-            min_dist = the_graph.return_weight_with_id(i, the_truck.package_list[min].location_id)
-            j_dist = the_graph.return_weight_with_id(i, the_truck.package_list[j].location_id)
+            if(i == 0):
+                min_dist = the_graph.return_weight_with_id(start, the_truck.package_list[min].location_id)
+            else:
+                min_dist = the_graph.return_weight_with_id(start, the_truck.package_list[min-1].location_id)
+            j_dist = the_graph.return_weight_with_id(the_truck.package_list[min-1].location_id, the_truck.package_list[j].location_id)
             if min_dist > j_dist: 
                 min = j 
                    
@@ -99,9 +113,8 @@ def load_trucks():
 
 def lookup_single_pkg():
     package_number = input("Enter package ID: \n")
-    package = the_hash.package_search(package_number)
-    s = "ID: %s Address: %s %s %s %s Weight: %s Status: %s LocationID: %s \n" % (package.ID, package.address, package.city, package.state, package.zip, package.weight, package.status, package.location_id)   
-    print(s)
+    pkg = the_hash.package_search(package_number)
+    print(str(pkg))
 
 def show_cargo():
     truck_number = int(input("Select truck (1,2): \n"))-1
@@ -252,7 +265,7 @@ def get_loc_id(package: Package):
     try:
          package.location_id = location_list.index(address)
     except ValueError:
-        s = "Address:  %s\n" % (address)
+        s = "Address:  %s ERROR\n" % (address)
         print(s)
     return 0
 
@@ -263,19 +276,24 @@ def print_locations():
         i += 1
 
 def load_dists():
-    i = 0
+    
+    weights_list = []
     fo = open("Distances.txt")
     while True:
         line = fo.readline()
         if (line.count("*") == 1):
             break
-        distanceInfo = line.split("|")
-
-        for j in range(27):
-            weight_matrix[i][j] = float(distanceInfo[j])
-        i += 1
-    i = 0
+        distances = line.split("|")
+        weights_list.append(distances)
     fo.close()
+
+    number_of_verts = len(weights_list)
+    the_graph.load_graph(number_of_verts)
+
+    for i in range(number_of_verts):
+        for j in range(number_of_verts):
+            the_graph.add_undirected_edge(the_graph.return_vertex(i), the_graph.return_vertex(j), float(weights_list[i][j]))
+    
     fo = open("Addresses.txt")
     while True:
         line = fo.readline()
@@ -283,7 +301,8 @@ def load_dists():
             break
         location_list.append(line.replace("\n", ""))
     fo.close()
-    the_graph.load_graph(weight_matrix, 27)
+
+
 
 def clock_inc():
     #Increment the clock by 5 minutes.

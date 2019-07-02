@@ -6,13 +6,9 @@ class Graph(object):
         self.distances = {}
         self.vertex_list = {}
   
-    def load_graph(self, weight_matrix, number_of_vertices):
+    def load_graph(self, number_of_vertices):
         for i in range(number_of_vertices):
             self.add_vertex(Vertex(i), i)
-   
-        for i in range(number_of_vertices):
-            for j in range(number_of_vertices):
-                self.add_undirected_edge(self.return_vertex(i), self.return_vertex(j), weight_matrix[i][j])
 
     def add_vertex(self, vertex, id):
         self.adj_list[vertex] = []

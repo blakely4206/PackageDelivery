@@ -21,5 +21,6 @@ class Package(object):
         else:
             return datetime.datetime.strptime(self.deadline, '%I:%M %p')
 
-
+    def __str__(self):
+        return "|ID: %s |Loc ID: %s |Address: %s |City: %s |State: %s |Zip: %s |Weight: %s |Status: %s |Deadline: %s |\n" % (self.ID, self.location_id, self.address, self.city, self.state, self.zip, self.weight, self.status, self.deadline)   
     
