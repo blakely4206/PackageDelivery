@@ -10,41 +10,37 @@ from Truck import Truck
 import operator
 
 location_list = []
-vertex_list = []
 the_graph = Graph()
 time = [8,0]
 total_mileage = 0
 trucks = [Truck(1), Truck(2)]
 HUB = 0
 
-def sort_for_early_delivery(package_list):
-
+def sort_packages(the_truck: Truck):  
+   
+    def sort_for_early_delivery(package_list):
     #Bubblesort the package_list to sort by deadline
+        index_of_last_EOD = 0
+        for i in range(len(package_list)):
+            if(package_list[i].deadline != "EOD"):
+                index_of_last_EOD = i
+            for j in range(len(package_list)-i - 1):
+                    if(package_list[j].getDeadline() > package_list[j+1].getDeadline()):
+                        later_pkg = package_list[j]
+                        package_list[j] = package_list[j+1]
+                        package_list[j+1] = later_pkg
+        return index_of_last_EOD
 
-    index_of_last_EOD = 0
-    for i in range(len(package_list)):
-        if(package_list[i].deadline != "EOD"):
-            index_of_last_EOD = i
-        for j in range(len(package_list)-i - 1):
-                if(package_list[j].getDeadline() > package_list[j+1].getDeadline()):
-                    later_pkg = package_list[j]
-                    package_list[j] = package_list[j+1]
-                    package_list[j+1] = later_pkg
-    return index_of_last_EOD
-
-def sort_for_duplicate_locations(package_list):
+    def sort_for_duplicate_locations(package_list):
     #Iterate through package_list and group all packages
     #with the same location_id
-
-    for i in range(len(package_list)):
-        for j in range(i+2, len(package_list)):
-            if package_list[i].location_id == package_list[j].location_id:
-                temp = package_list[j]
-                package_list.remove(temp)
-                package_list.insert(i, temp)
-    return 0
-
-def sort_packages(the_truck: Truck):  
+        for i in range(len(package_list)):
+            for j in range(i+2, len(package_list)):
+                if package_list[i].location_id == package_list[j].location_id:
+                    temp = package_list[j]
+                    package_list.remove(temp)
+                    package_list.insert(i, temp)
+        return 0
 
     #Use selection sort to arrange packages by nearest neighbor.
     #Packages are already sorted by deadline. Start with final non-EOD
