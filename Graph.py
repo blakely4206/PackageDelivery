@@ -18,6 +18,7 @@ class Graph(object):
         self.adj_list[vertex] = []
         
     def insert_edge(self, vertex_A, vertex_B, dist):
+        #Graph is undirected. This creates an edge for both directions.
         self.distances[(vertex_A, vertex_B)] = dist
         self.adj_list[vertex_A].append(vertex_B)
 
@@ -34,6 +35,7 @@ class Graph(object):
         return self.distances[(vertex_A, vertex_B)]
 
     def return_weight_with_id(self, id_A, id_B):
+        #Allows weight to be returned by only providing the vertex label
         vertex_a = self.return_vertex(id_A)
         vertex_b = self.return_vertex(id_B)
         

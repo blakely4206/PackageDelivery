@@ -26,11 +26,3 @@ class Truck:
             s += "|ID: %-2s |Loc ID: %-2s |Address: %-41s |City: %-18s |State: %-6s |Zip: %-5s |Weight: %-2s |Status: %-20s |Deadline: %-18s |\n" % (pkg.ID, pkg.location_id, pkg.address, pkg.city, pkg.state, pkg.zip, pkg.weight, pkg.status, pkg.getDeadline())   
             
         return s
-
-    def compare(a: Package, b: Package):
-        if(a.getDeadline() > b.getDeadline()):
-            return 1
-        elif(a.getDeadline() == b.getDeadline()):
-            return 0
-        else:
-            return -1

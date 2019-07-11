@@ -96,7 +96,40 @@ def show_cargo():
 def run_delivery():   
     mpm = 0.3
     current_time = "%02d:%02d" % (time[0], time[1])
-    #current_delivery = the_graph.return_vertex(0)
+
+    #Handles multiple deliveries to same address
+    def multiple_pkgs_same_address(truck: Truck):
+        all_pkgs = False
+        while(all_pkgs == False):
+            del_str = "\tPackage #%s Delivered " % (truck.package_list[0].ID)
+            print(del_str)
+            update_delivery_status(truck)
+            the_hash.update_pkg(truck.package_list[0])
+            current_delivery = truck.package_list.pop(0).location_id
+            if(len(truck.package_list) == 1):
+                all_pkgs = True
+                return_to_hub(truck)
+            else:
+                next_delivery = truck.package_list[0].location_id
+                truck.distance_to_next_delivery = the_graph.return_weight_with_id(current_delivery, next_delivery)
+                if(truck.distance_to_next_delivery > 0 and all_pkgs == False):
+                    truck.distance_to_next_delivery += miles_over_destination
+                    all_pkgs = True
+                    del_str = "Next Stop: %-39s %-18s |Package Number: %-2s |Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
+                    print(truckUpdate + del_str)
+        return 0
+
+    #Updates the package status once it's delivered
+    def update_delivery_status(truck: Truck):
+        truck.package_list[0].status = "Delivered at " + current_time
+    
+    def return_to_hub(truck: Truck):
+        del_str = "Returning to HUB "
+        print(truckUpdate + del_str)
+        truck.current_destination = 0
+        update_delivery_status(truck)
+        the_hash.update_pkg(truck.package_list[0])
+        truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.package_list.pop(0).location_id, 0) + mpm 
 
     def run_print_time():
         clock_inc()
@@ -148,53 +181,30 @@ def run_delivery():
     while(True):
         current_time = run_print_time()
         for truck in trucks:
-            truckUpdate = "TRUCK #: %s| " % (truck.truck_id)           
+            truckUpdate = "TRUCK #: %s| " % (truck.truck_id)    
+            #Verify that truck has been released
             if(truck.released):
                 truck.mileage += mpm
-                if(truck.distance_to_next_delivery - mpm < 0):
-                    print("MPM  = " + str(mpm))
+                #Destination Has Arrived
+                if(truck.distance_to_next_delivery - mpm <= 0):
                     miles_over_destination = truck.distance_to_next_delivery - mpm
-                    print("DISTANCE REAMAINING  = "  + str(truck.distance_to_next_delivery))
-                    print("MILES OVER = " + str(miles_over_destination))
+                    #If this is the last package, next stop is HUB
                     if(len(truck.package_list) == 1):
-                        del_str = "Returning to HUB "
-                        print(truckUpdate + del_str)
-                        truck.current_destination = 0
-                        truck.package_list[0].status = "Delivered at " + current_time
-                        the_hash.update_pkg(truck.package_list[0])
-                        truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.package_list.pop(0).location_id, 0) + mpm 
+                        return_to_hub(truck)
+                    #Arrived at HUB
                     elif(len(truck.package_list) == 0):
                         del_str = "at HUB "
                         print(truckUpdate + del_str)
                         truck.released = False
+                    #Multiple Packages to Same Address
                     else:
-                        all_pkgs = False
-                        while(all_pkgs == False):
-                            del_str = "\tPackage #%s Delivered " % (truck.package_list[0].ID)
-                            print(del_str)
-                            truck.package_list[0].status = "Delivered at " + current_time 
-                            the_hash.update_pkg(truck.package_list[0])
-                            current_delivery = truck.package_list.pop(0).location_id
-                            if(len(truck.package_list) == 1):
-                                all_pkgs = True
-                                del_str = "Returning to HUB "
-                                print(truckUpdate + del_str)
-                                truck.current_destination = 0
-                                truck.package_list[0].status = "Delivered at " + current_time
-                                the_hash.update_pkg(truck.package_list[0])
-                                truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.package_list.pop(0).location_id, 0) + mpm 
-                            else:
-                                next_delivery = truck.package_list[0].location_id
-                                truck.distance_to_next_delivery = the_graph.return_weight_with_id(current_delivery, next_delivery)
-                            if(truck.distance_to_next_delivery > 0 and all_pkgs == False):
-                                truck.distance_to_next_delivery += miles_over_destination
-                                all_pkgs = True
-                                del_str = "Next Stop: %-39s %-18s |Package Number: %-2s |Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
-                                print(truckUpdate + del_str)
+                        multiple_pkgs_same_address(truck)
+                #Move on to the next delivery
                 elif(len(truck.package_list) != 0):
                     truck.distance_to_next_delivery -= mpm
                     str3 = "Next Stop: %-39s %s\t |Package Number: %s\t|Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
                     print(truckUpdate + str3)
+                #Deliveries complete, return to HUB
                 else:
                     truck.distance_to_next_delivery -= mpm
                     str3 = "Returning to HUB\tDistance: %.1f " % (truck.distance_to_next_delivery)
@@ -211,6 +221,7 @@ def run_delivery():
     return 0
 
 def load_packages(the_hash: pkg_hash):
+    #Load package information from txt file. Insert each package into hash table.
     fo = open("PackageList.txt")
     while True:
         line = fo.readline()
@@ -219,26 +230,24 @@ def load_packages(the_hash: pkg_hash):
         package_info = line.split("|")
         the_package = Package(package_info[0],package_info[1],package_info[2],package_info[3],package_info[4],package_info[5],package_info[6],"At HUB")
         the_hash.package_insert(the_package.ID, the_package)
-        get_loc_id(the_package)
+        the_package.location_id = get_loc_id(the_package)
 
 def get_loc_id(package: Package):
-    loc_id = -1
+    #Takes the full address string and returns location ID
     address = "%s|%s|%s|%s" % (package.address, package.city, package.state, package.zip)
-    try:
-         package.location_id = location_list.index(address)
-    except ValueError:
-        s = "Address:  %s ERROR\n" % (address)
-        print(s)
-    return 0
+
+    package.location_id = location_list.index(address)
+    return package.location_id
 
 def print_locations():
+    #Prints a list off all locations with index
     i = 0
     for loc in location_list:
         print("%d:\t%s" % (i,loc))
         i += 1
 
 def load_dists():
-    
+    #Loads distances from txt file into an array. Creates graph and loads edges with distances
     weights_list = []
     fo = open("Distances.txt")
     while True:
@@ -256,6 +265,7 @@ def load_dists():
         for j in range(number_of_verts):
             the_graph.insert_edge(the_graph.return_vertex(i), the_graph.return_vertex(j), float(weights_list[i][j]))
     
+    #Loads all addresses from txt file into array of locations
     fo = open("Addresses.txt")
     while True:
         line = fo.readline()
@@ -278,6 +288,7 @@ def clock_inc():
     return 0
 
 def show_all_pkgs():
+    #Prints package information for all packages
     current_time = "\t\t\t\t\t\t\t\t\t%02d:%02d" % (time[0], time[1])
     print(current_time)
     print(str(the_hash))
@@ -287,6 +298,7 @@ def get_address(loc_id):
     return location_list[int(loc_id)].split('|')
 
 def update_pkg_info():
+    #Allows package address or deadline to be updated.
     def update_address(loc_id, pkg: Package):
         pkg.location_id = int(loc_id)
         
