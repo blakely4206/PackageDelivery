@@ -1,34 +1,40 @@
-from Vertex import Vertex
+class Vertex(object):
+    def __init__(self, label):
+        self.label = label
+
+    def __str__(self):
+     return self.label
 
 class Graph(object):
     def __init__(self):
         self.adj_list = {}
         self.distances = {}
-        self.vertex_list = {}
   
     def load_graph(self, number_of_vertices):
         for i in range(number_of_vertices):
-            self.add_vertex(Vertex(i), i)
+            self.add_vertex(Vertex(i))
 
-    def add_vertex(self, vertex, id):
+    def add_vertex(self, vertex: Vertex):
         self.adj_list[vertex] = []
-        self.vertex_list[id] = vertex
         
-    def add_directed_edge(self, from_vertex, to_vertex, dist):
-        self.distances[(from_vertex, to_vertex)] = dist
-        self.adj_list[from_vertex].append(to_vertex)
+    def insert_edge(self, vertex_A, vertex_B, dist):
+        self.distances[(vertex_A, vertex_B)] = dist
+        self.adj_list[vertex_A].append(vertex_B)
+
+        self.distances[(vertex_B, vertex_A)] = dist
+        self.adj_list[vertex_B].append(vertex_A)
+
+    def return_vertex(self, loc_id):
+        for v in self.adj_list:
+            if(v.label == loc_id):
+                return v
+        return None
+
+    def return_weight(self, vertex_A, vertex_B):
+        return self.distances[(vertex_A, vertex_B)]
+
+    def return_weight_with_id(self, id_A, id_B):
+        vertex_a = self.return_vertex(id_A)
+        vertex_b = self.return_vertex(id_B)
         
-    def add_undirected_edge(self, vertex_a, vertex_b, dist):
-        self.add_directed_edge(vertex_a, vertex_b, dist)
-        self.add_directed_edge(vertex_b, vertex_a, dist)
-
-    def return_vertex(self, label):
-        return self.vertex_list[label]
-
-    def return_weight(self, vertex_a, vertex_b):
-        return self.distances[(vertex_a, vertex_b)]
-
-    def return_weight_with_id(self, labelA, labelB):
-        vertex_a = self.return_vertex(labelA)
-        vertex_b = self.return_vertex(labelB)
-        return self.distances[(vertex_a, vertex_b)]
+        return self.distances[vertex_a, vertex_b]

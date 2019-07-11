@@ -2,12 +2,12 @@
 #876696
 
 from Graph import Graph
+from Graph import Vertex
 from Pack import Package
 from Hash import pkg_hash
 import datetime
 from Truck import Truck
 import operator
-from Vertex import Vertex
 
 location_list = []
 vertex_list = []
@@ -18,6 +18,9 @@ trucks = [Truck(1), Truck(2)]
 HUB = 0
 
 def sort_for_early_delivery(package_list):
+
+    #Bubblesort the package_list to sort by deadline
+
     index_of_last_EOD = 0
     for i in range(len(package_list)):
         if(package_list[i].deadline != "EOD"):
@@ -27,46 +30,35 @@ def sort_for_early_delivery(package_list):
                     later_pkg = package_list[j]
                     package_list[j] = package_list[j+1]
                     package_list[j+1] = later_pkg
-
-    sort_for_duplicate_locations(package_list)
     return index_of_last_EOD
 
 def sort_for_duplicate_locations(package_list):
-    for i in range(len(package_list)-1):
-        for j in range(1,len(package_list)):
-            if(package_list[i].location_id == package_list[j].location_id and i != j):
-                same_dest= package_list[j]
-                package_list.remove(same_dest)
-                package_list.insert(i, same_dest)
+    #Iterate through package_list and group all packages
+    #with the same location_id
+
+    for i in range(len(package_list)):
+        for j in range(i+2, len(package_list)):
+            if package_list[i].location_id == package_list[j].location_id:
+                temp = package_list[j]
+                package_list.remove(temp)
+                package_list.insert(i, temp)
     return 0
 
 def sort_packages(the_truck: Truck):  
 
-    #Sort all packages with non-EOD deadline to the 
-    #front of the list.
-    #sort_for_early_delivery(the_truck.package_list)
-    
     #Use selection sort to arrange packages by nearest neighbor.
     #Packages are already sorted by deadline. Start with final non-EOD
     #package and then find nearest neighbor.
 
-    #start = get_last_early_delivery(the_truck.package_list)
     start = sort_for_early_delivery(the_truck.package_list)
-    n = len(the_truck.package_list)
+    sort_for_duplicate_locations(the_truck.package_list)
+    for i in range(start, len(the_truck.package_list)-1): 
+        for j in range(i+1, len(the_truck.package_list)-1): 
+            if the_graph.return_weight_with_id(i, j) > the_graph.return_weight_with_id(i, j+1): 
+                min = j+1 
+        the_truck.package_list[i+1], the_truck.package_list[min] = the_truck.package_list[min], the_truck.package_list[i+1] 
 
-    for i in range(start, n): 
-        min = i 
-        for j in range(i+1, n): 
-            if(i == 0):
-                min_dist = the_graph.return_weight_with_id(start, the_truck.package_list[min].location_id)
-            else:
-                min_dist = the_graph.return_weight_with_id(start, the_truck.package_list[min-1].location_id)
-            j_dist = the_graph.return_weight_with_id(the_truck.package_list[min-1].location_id, the_truck.package_list[j].location_id)
-            if min_dist > j_dist: 
-                min = j 
-                   
-        the_truck.package_list[i], the_truck.package_list[min] = the_truck.package_list[min], the_truck.package_list[i] 
-    
+    sort_for_duplicate_locations(the_truck.package_list)
     return 0
 
 def load_trucks():
@@ -104,7 +96,7 @@ def show_cargo():
 def run_delivery():   
     mpm = 0.3
     current_time = "%02d:%02d" % (time[0], time[1])
-    current_delivery = the_graph.return_vertex(0)
+    #current_delivery = the_graph.return_vertex(0)
 
     def run_print_time():
         clock_inc()
@@ -113,21 +105,6 @@ def run_delivery():
         print(spacing + current_time)
         return current_time
 
-    def deliver_pkg(truck: Truck):
-        str = "\tPackage #%s Delivered " % (truck.package_list[0].ID)
-        print(str)
-        truck.current_location = truck.package_list[0].location_id
-        truck.package_list[0].status = "Delivered " + current_time
-        the_hash.update_pkg(truck.package_list[0])
-        if(len(truck.package_list) == 1):
-            truck.current_destination = HUB
-            truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.current_location, truck.current_destination) + mpm 
-            truck.package_list.pop(0)
-        elif(len(truck.package_list) > 1):
-            truck.current_destination = truck.package_list[1].location_id
-            truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.current_location, truck.current_destination) + mpm 
-            truck.package_list.pop(0)
-    
     def truck_menu():
         t = True
         while(t == True):
@@ -175,42 +152,45 @@ def run_delivery():
             if(truck.released):
                 truck.mileage += mpm
                 if(truck.distance_to_next_delivery - mpm < 0):
+                    print("MPM  = " + str(mpm))
                     miles_over_destination = truck.distance_to_next_delivery - mpm
+                    print("DISTANCE REAMAINING  = "  + str(truck.distance_to_next_delivery))
+                    print("MILES OVER = " + str(miles_over_destination))
                     if(len(truck.package_list) == 1):
-                        str = "Returning to HUB "
-                        print(truckUpdate + str)
+                        del_str = "Returning to HUB "
+                        print(truckUpdate + del_str)
                         truck.current_destination = 0
                         truck.package_list[0].status = "Delivered at " + current_time
                         the_hash.update_pkg(truck.package_list[0])
                         truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.package_list.pop(0).location_id, 0) + mpm 
                     elif(len(truck.package_list) == 0):
-                        str = "at HUB "
-                        print(truckUpdate + str)
+                        del_str = "at HUB "
+                        print(truckUpdate + del_str)
                         truck.released = False
                     else:
                         all_pkgs = False
                         while(all_pkgs == False):
-                            str = "\tPackage #%s Delivered " % (truck.package_list[0].ID)
-                            print(str)
+                            del_str = "\tPackage #%s Delivered " % (truck.package_list[0].ID)
+                            print(del_str)
                             truck.package_list[0].status = "Delivered at " + current_time 
                             the_hash.update_pkg(truck.package_list[0])
-                            current_delivery = the_graph.return_vertex(truck.package_list.pop(0).location_id)
+                            current_delivery = truck.package_list.pop(0).location_id
                             if(len(truck.package_list) == 1):
                                 all_pkgs = True
-                                str = "Returning to HUB "
-                                print(truckUpdate + str)
+                                del_str = "Returning to HUB "
+                                print(truckUpdate + del_str)
                                 truck.current_destination = 0
                                 truck.package_list[0].status = "Delivered at " + current_time
                                 the_hash.update_pkg(truck.package_list[0])
                                 truck.distance_to_next_delivery = the_graph.return_weight_with_id(truck.package_list.pop(0).location_id, 0) + mpm 
                             else:
-                                next_delivery = the_graph.return_vertex(truck.package_list[0].location_id)
-                                truck.distance_to_next_delivery = the_graph.return_weight(current_delivery, next_delivery)
+                                next_delivery = truck.package_list[0].location_id
+                                truck.distance_to_next_delivery = the_graph.return_weight_with_id(current_delivery, next_delivery)
                             if(truck.distance_to_next_delivery > 0 and all_pkgs == False):
                                 truck.distance_to_next_delivery += miles_over_destination
                                 all_pkgs = True
-                                str = "Next Stop: %-39s %-18s |Package Number: %-2s |Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
-                                print(truckUpdate + str)
+                                del_str = "Next Stop: %-39s %-18s |Package Number: %-2s |Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
+                                print(truckUpdate + del_str)
                 elif(len(truck.package_list) != 0):
                     truck.distance_to_next_delivery -= mpm
                     str3 = "Next Stop: %-39s %s\t |Package Number: %s\t|Distance: %.1f " % (truck.package_list[0].address, truck.package_list[0].city, truck.package_list[0].ID, truck.distance_to_next_delivery)
@@ -227,6 +207,7 @@ def run_delivery():
         userInput = input("Enter to Continue or 0 to Exit\n")
         if(userInput == "0"):
             break
+    
     return 0
 
 def load_packages(the_hash: pkg_hash):
@@ -273,7 +254,7 @@ def load_dists():
 
     for i in range(number_of_verts):
         for j in range(number_of_verts):
-            the_graph.add_undirected_edge(the_graph.return_vertex(i), the_graph.return_vertex(j), float(weights_list[i][j]))
+            the_graph.insert_edge(the_graph.return_vertex(i), the_graph.return_vertex(j), float(weights_list[i][j]))
     
     fo = open("Addresses.txt")
     while True:
