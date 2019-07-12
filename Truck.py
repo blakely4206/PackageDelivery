@@ -19,7 +19,7 @@ class Truck:
         else:
             return "Truck Full \n"
     
-    def ViewCargo(self):
+    def view_code(self):
         pkg: Package   
         s = ""
         for pkg in self.package_list: 

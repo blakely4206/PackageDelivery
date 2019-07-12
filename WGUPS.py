@@ -87,7 +87,7 @@ def lookup_single_pkg():
 
 def show_cargo():
     truck_number = int(input("Select truck (1,2): \n"))-1
-    print(trucks[truck_number].ViewCargo())
+    print(trucks[truck_number].view_code())
 
 def run_delivery():   
     mpm = 0.3
@@ -351,8 +351,8 @@ def update_pkg_info():
             if(user_input == "3"): #Exit
                 break
             elif(user_input == "1"): 
-                loc_id = input("Enter new location ID or enter 1 to print list of locations\n")
-                if(loc_id == "1"):
+                loc_id = input("Enter new location ID or enter x to print list of locations\n")
+                if(loc_id == "x"):
                     print("Current location: %s\n" % (pkg.location_id))
                     print_locations()
                 else:
