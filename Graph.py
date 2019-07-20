@@ -11,6 +11,7 @@ class Graph(object):
         self.distances = {}
   
     def load_graph(self, number_of_vertices):
+        #Fill graph with verticies, each labeled based on the value of i.
         for i in range(number_of_vertices):
             self.add_vertex(Vertex(i))
 
@@ -18,14 +19,17 @@ class Graph(object):
         self.adj_list[vertex] = []
         
     def insert_edge(self, vertex_A, vertex_B, dist):
-        #Graph is undirected. This creates an edge for both directions.
+        #Graph is undirected. This creates an edge for both directions. Distance is 
+        #inserted in distances{} at (vertex_A, vertex_B) and (vertex_B, vertex_A).
+        #A vertex is added to adj_list at both vertex_A and vertex_B.
         self.distances[(vertex_A, vertex_B)] = dist
         self.adj_list[vertex_A].append(vertex_B)
-
+        
         self.distances[(vertex_B, vertex_A)] = dist
         self.adj_list[vertex_B].append(vertex_A)
 
     def return_vertex(self, loc_id):
+        #Iterate through adj_list and return vertex if label is equal to loc_id.
         for v in self.adj_list:
             if(v.label == loc_id):
                 return v

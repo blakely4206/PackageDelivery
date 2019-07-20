@@ -33,9 +33,6 @@
     <Compile Include="Truck.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Vertex.py">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="WGUPS.py">
       <SubType>Code</SubType>
     </Compile>

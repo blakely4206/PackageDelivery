@@ -11,6 +11,7 @@ class Truck:
      self.released = False
      self.distance_to_next_delivery = 0
 
+     #Insert package into package_list if truck isn't already full
     def load_truck(self, pkg: Package):
         if(len(self.package_list) < 16):
             pkg.status = "Loaded on Truck #" + str(self.truck_id)

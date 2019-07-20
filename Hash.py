@@ -7,9 +7,11 @@ class pkg_hash:
             self.hash_table.append([])
 
     def update_pkg(self, pkg: Package):
+        #Takes a package object and replaces existing package in hash table. The index (bucket) is
+        #equal to the key mod 40.
         key = pkg.ID
         bucket = int(key) % 40
-
+        #Sort through hash_table and return package where ID is equal to key. 
         package: Package
         for package in self.hash_table[bucket]:
             if int(package.ID) == int(key):
@@ -17,13 +19,16 @@ class pkg_hash:
                 return package
             else:
                 return None
-
+    
     def package_insert(self, key, package):
+        #Inserts package object into hash table at index of key mod 40.
         bucket = int(key) % 40
 
         self.hash_table[bucket].append(package)
 
     def package_search(self, key):
+        #Searches for package object within hash table at index of key mod 40. Package is returned if its ID
+        #matches the key.
         pkg_bucket = int(key) % 40
         package: Package
 
